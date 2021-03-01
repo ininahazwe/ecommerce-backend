@@ -1,11 +1,7 @@
-'use strict';
-
 const _ = require('lodash');
 
 module.exports = async (ctx, next) => {
   let role;
-
-  await strapi.plugins['magic'].services['magic'].loginWithMagic(ctx)
 
   if (ctx.state.user) {
     // request is already authenticated in a different way
@@ -23,9 +19,16 @@ module.exports = async (ctx, next) => {
       // fetch authenticated user
       ctx.state.user = await strapi.plugins[
         'users-permissions'
-        ].services.user.fetchAuthenticatedUser(id);
+      ].services.user.fetchAuthenticatedUser(id);
+      
     } catch (err) {
-      return handleErrors(ctx, err, 'unauthorized');
+      /** With Magic Changes */
+        try{
+          await strapi.plugins['magic'].services['magic'].loginWithMagic(ctx)
+      } catch (err) {
+          return handleErrors(ctx, err, 'unauthorized');
+      }
+      /** END With Magic Changes */
     }
 
     if (!ctx.state.user) {
